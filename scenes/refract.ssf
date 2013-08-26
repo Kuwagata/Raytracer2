@@ -1,0 +1,55 @@
+Sky 
+horizon .4
+base .5
+blue 1.0
+
+Sphere
+center 1.4 -1.25 -1.5
+radius .75
+color 0.0 0.0 0.0
+reflectwt 0 0 0
+refractwt 1.0 
+refractindex 1.52
+
+Sphere
+center -1.5 -.25 -2.25
+radius .75
+color 0 0 0
+reflectwt 0 0 0
+refractwt 1 
+refractindex 1.52
+
+Floor
+height -2
+color1 .545 .27 .0745
+color2 1 .92 .8
+reflectwt .02 .02 .02
+
+# Box
+# min -3 -2 -4.5
+# max 3 -.5 -3.0
+# color 0 1 1 
+# reflectwt 0.0 0.0 0.0
+# refractwt 1.0 
+# refractindex 1.52
+
+# Box
+# min -2 -2 -3
+# max -1 -1 -1
+# color 0 1 1 
+# reflectwt 0.0 0.0 0.0
+# refractwt 1.0 
+# refractindex 1.52
+# 
+Light
+center -1.5 2.5 .5
+radius .25
+
+Light
+center 1.5 2.5 .5
+radius .25
+
+Light
+center 0 3.5 .5
+radius .25
+

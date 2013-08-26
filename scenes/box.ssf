@@ -1,0 +1,70 @@
+eye 0.0 .75 2.0 # the location of the view point
+ambient weight .2 # the percentage of diffuse light that ambient is set to.
+
+Sky 
+horizon .4
+base .5
+blue 1.0
+
+Light
+center 0.0 2.0 -2
+color 1.0 1.0 1.0
+radius .25
+
+# right wall
+Plane
+distance 4.0
+normal -1 0 0
+color 1.0 1.0 0.0
+reflectwt .02 .02 .02
+
+#left wall
+Plane
+distance 4.0
+normal 1 0 0
+color 1.0 0.0 0.0
+reflectwt .02 .02 .02
+
+# ceiling
+Plane
+distance 2.0
+normal 0 -1 0
+color 1.0 0.0 1.0
+reflectwt .02 .02 .02
+
+# floor
+Plane
+distance 5.0
+normal 0 1 0
+color 0.0 1.0 1.0
+reflectwt .02 .02 .02
+
+# back wall
+Plane
+distance 6.0
+normal 0 0 1
+color 0.0 1.0 0.0
+reflectwt .02 .02 .02
+
+# wall behind us
+Plane
+distance 6.0
+normal 0 0 -1
+color 0.0 0.0 1.0
+reflectwt .02 .02 .02
+
+Sphere
+color 0.0 0.0 0.0
+center -1.5 -3 -4
+radius 1.0
+reflectwt 1.0 1.0 1.0
+refractwt 0.0 
+rafractindex 1
+
+Sphere
+color 1.0 0.0 0.0
+center 1.5 -2 -4.5
+radius 1.0
+reflectwt 0.0 0.0 0.0
+refractwt 1.0
+refractindex 1.52
