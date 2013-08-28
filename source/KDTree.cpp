@@ -8,51 +8,62 @@ void KDTree::insert (int position, KDNode* &toIns)
    return;
 }
 
-void KDTree::locate (int curIndex, MaxHeap* &h, double &maxDist, const Point &target) const
+// Return number of elements found within maxDist and added to the heap, h
+int KDTree::locate (int curIndex, MaxHeap* &h, double &maxDist, const Point &target) const
 {
    int left = 2 * curIndex;
    int right = 2 * curIndex+1;
-   //old: if(curIndex >= size)
-   if(curIndex * 2 >= size)
+   int count = 0;
+
+   // We're at the bottom of the tree - no points
+   if(curIndex * 2 > size)
    {
-      return;
+      return 0;
    }
    else
    {
       double curDist = distCalc(target, array[curIndex]->p);
+
+      // If the point is within range
       if(curDist < maxDist)
       {
          //insert and search left + right
          Closest toAdd(array[curIndex]->p, curDist);
          h->insert(toAdd);
-         locate(left, h, maxDist, target);
-         locate(right, h, maxDist, target);
+         count++;
+         count += locate(left, h, maxDist, target);
+         count += locate(right, h, maxDist, target);
       }
       else
       {
+         // Get the diff on this depth's axis
          double diff = target[array[curIndex]->axis] - array[curIndex]->p->loc[array[curIndex]->axis];
          diff *= diff;
+
+         // If less, eligible points could exist in either subtree
          if(diff < maxDist)
          {
             //search left and right
-            locate(left, h, maxDist, target);
-            locate(right, h, maxDist, target);
+            count += locate(left, h, maxDist, target);
+            count += locate(right, h, maxDist, target);
          }
          else
          {
+            // Eligible points exist only in the left or right subtree
             if(target[array[curIndex]->axis] <= array[curIndex]->p->loc[array[curIndex]->axis])
             {
                //search left
-               locate(left, h, maxDist, target);
+               count += locate(left, h, maxDist, target);
             }
             else
             {
                //search right
-               locate(right, h, maxDist, target);
+               count += locate(right, h, maxDist, target);
             }
          }
       }
    }
+   return count;
 }
 
 double KDTree::distCalc(const Point &point, Photon* &photon) const
@@ -74,9 +85,13 @@ KDTree::~KDTree ()
    }
 }
 
+/*
+ * Construct at the full range - 0 -> num photons
+ * Split list in half
+ */
 void KDTree::insert(Photon** &genPhotons, int left, int right, int pos)
 {
-   // Recursive base case
+   // Recursive base case - we're at a leaf
    if(left == right)
    {
       KDNode* newnode = new KDNode(genPhotons[left], pos);
@@ -84,8 +99,11 @@ void KDTree::insert(Photon** &genPhotons, int left, int right, int pos)
       return;
    }
 
-   // Target is average of left and right
+   // Split list in half
    int target = (left + right) / 2;
+   double target_full = ((double) left + (double) right) / 2.0;
+
+   // Find best axis to categorize on for the subset of points constrained by left, right
    int axis = findAxis(genPhotons, left, right);
 
    // Inserts target
@@ -100,13 +118,16 @@ void KDTree::insert(Photon** &genPhotons, int left, int right, int pos)
 MaxHeap* KDTree::findNearestN (int num_photons, double &dist, const Point &target) const
 {
    MaxHeap* toReturn = new MaxHeap(num_photons);
-   locate(1, toReturn, dist, target);
+   // Start looking at the root
+   int numFound = locate(1, toReturn, dist, target);
+   //std::cerr << "Found " << numFound << " photons; Heap contains " << toReturn->get_size() << std::endl;
    return toReturn;
 }
 
 // Determine which axis to classify on (i.e. does this level of the tree classify on x, y, or z?)
 int KDTree::findAxis(Photon** &genPhotons, int left, int right)
 {
+   // Start at first photon in the list, set default min, max = min at beginning
    double xmin = genPhotons[left]->loc.x;
    double ymin = genPhotons[left]->loc.y;
    double zmin = genPhotons[left]->loc.z;
@@ -122,6 +143,7 @@ int KDTree::findAxis(Photon** &genPhotons, int left, int right)
          ymin = genPhotons[i]->loc.y;
       if(genPhotons[i]->loc.z < zmin)
          zmin = genPhotons[i]->loc.z;
+
       if(genPhotons[i]->loc.x > xmax)
          xmax = genPhotons[i]->loc.x;
       if(genPhotons[i]->loc.y > ymax)
@@ -148,6 +170,7 @@ int KDTree::findAxis(Photon** &genPhotons, int left, int right)
 
 void KDTree::median(Photon** &genPhotons, int left, int right, int target, int axis, int pos)
 {
+   // base case - we're at an empty leaf
    if(right == left)
    {
       KDNode* newnode = new KDNode(genPhotons[target], axis);
@@ -208,6 +231,7 @@ void KDTree::median(Photon** &genPhotons, int left, int right, int target, int a
    return;
 }
 
+// simple swap
 void KDTree::swaptwo(Photon** &genPhotons, int a, int b)
 {
    Photon* temp;
@@ -216,6 +240,8 @@ void KDTree::swaptwo(Photon** &genPhotons, int a, int b)
    genPhotons[b] = temp;
 }
 
+// in-place sort of three photons based on supplied axis
+// negative to positive
 void KDTree::swapthree(Photon** &genPhotons, int axis, int x, int y, int z)
 {
    Photon * a;
@@ -224,10 +250,14 @@ void KDTree::swapthree(Photon** &genPhotons, int axis, int x, int y, int z)
    a = genPhotons[x];
    b = genPhotons[y];
    c = genPhotons[z];
+
+   // if x > y & z
    if((a->loc[axis] > b->loc[axis])&&(a->loc[axis] > c->loc[axis]))
    {
       swaptwo(genPhotons, x, z);
    }
+
+   // if x > y
    if(a->loc[axis] > b->loc[axis])
    {
       swaptwo(genPhotons, x, y);

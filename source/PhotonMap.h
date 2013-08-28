@@ -10,7 +10,7 @@ class PhotonMap
 {
    private:
       Scene &scene;
-      static const unsigned int TOTAL_PHOTONS = 262143;     /*2^18 = 262143*/ 
+      static const unsigned int TOTAL_PHOTONS = 524287;     /*2^18 = 262143*/    /*32767*/
       KDTree *kdtree;                                       /*2^19 = 524287*/
       
    public:

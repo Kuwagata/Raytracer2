@@ -29,7 +29,7 @@ Color Raytracer::antialias_trace (const Point &sp, int row, int col,
    Point::refractindex = 1.0;
    Color colorSum = trace_pixel (sp, dir, traveled);
    
-   for (int i=1; i < NUM_TRACES; ++i) {
+   for (int i=1; i <= NUM_TRACES; ++i) {
       dir = Scene::virtual_coord ((int)(row-.5+jitter(2,i)), 
                                   (int)(col-.5+jitter(3,i)), height, width);
       Point::refractindex = 1.0;
@@ -71,8 +71,8 @@ Color Raytracer::compute_transmission (const intersection &intersect,
    Point normal = intersect.obj->get_normal(intersect.spot);
 
    // get the unit vector from the hit spot to the starting point
-   Point incoming = sp.get_unit_vector (intersect.spot);
-   Point outgoing = incoming.bend (normal, intersect.obj->refractionindex());
+   Point incoming = sp.get_unit_vector(intersect.spot);
+   Point outgoing = incoming.bend(normal, intersect.obj->refractionindex());
    //Point outgoing = incoming;
 
    // Add the hit spot to the outgoing angle so it can be the direction.
@@ -81,7 +81,6 @@ Color Raytracer::compute_transmission (const intersection &intersect,
    Color trans = trace_pixel (intersect.spot, outgoing, traveled);
    //if (trans != Color::black()) std::cerr << "NON ZERO: " << trans << std::endl;
    return trans;
-
 }
 
 Color Raytracer::compute_specular (const intersection &intersect,
@@ -193,6 +192,7 @@ double Raytracer::jitter (int base, int number) {
 int main (int argc, char *argv[]) {
   time_t start,end;
   double dif;
+  srand(time(NULL));
 
   time (&start);
    if (1 == argc) {
@@ -205,11 +205,14 @@ int main (int argc, char *argv[]) {
    Scene scene (argv[1]);
    PhotonMap map (scene);
    map.trace_photons();
+
    if (argc > 3) {
       tracer = new Raytracer (map, Raytracer::MAP_ONLY, atoi(argv[2]), atoi(argv[3]));
    } else {
-      tracer = new Raytracer (map, Raytracer::MAP_ONLY);
+      //tracer = new Raytracer (map, Raytracer::MAP_ONLY);
+      tracer = new Raytracer (map, false);
    }
+
    tracer->create_image();
    time (&end);
    dif = difftime (end,start);

@@ -18,7 +18,7 @@ class KDTree
       KDNode** array;
       
       void insert(int curIndex, KDNode* &toIns);
-      void locate(int curIndex, MaxHeap* &h, double &maxDist, const Point &target) const;
+      int locate(int curIndex, MaxHeap* &h, double &maxDist, const Point &target) const;
       
    public:
       double distCalc(const Point &point, Photon* &photon) const;

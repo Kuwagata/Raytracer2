@@ -61,9 +61,3 @@ Floor.h Box.h Makefile
 
 clean:
 	rm -f *.o core raytrace *.ppm *.gch
-
-test:
-	./raytrace ../scenes/box2.ssf
-
-test_debug:
-	valgrind ./raytrace ../scenes/box2.ssf

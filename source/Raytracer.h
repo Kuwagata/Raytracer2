@@ -10,7 +10,7 @@ class Raytracer {
 
    private:
       static double MAX_DIST;
-      static const int NUM_PHOTONS=600;
+      static const int NUM_PHOTONS=800;
       static const int CHANNELS=3;
       static const int DEFAULT_WIDTH=800;
       static const int DEFAULT_HEIGHT=600;

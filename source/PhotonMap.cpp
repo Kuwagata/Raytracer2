@@ -1,5 +1,6 @@
 #include "PhotonMap.h"
 #include <iostream>
+#include <fstream>
  
 // "spot" is the location at which we need to determine illumination
 // normal is not needed for now
@@ -12,19 +13,25 @@ Color PhotonMap::illumination (const Point &spot, const Point &normal,
                      double max_dist, unsigned int num_photons) const
 {
    double squareMaxDist = SQUARE(max_dist);
-   
-   MaxHeap* clsPhotons = kdtree->findNearestN(num_photons, squareMaxDist, spot);
-   
+
+   //old
+   //MaxHeap* clsPhotons = kdtree->findNearestN(num_photons, squareMaxDist, spot);
+   MaxHeap* clsPhotons = kdtree->findNearestN(num_photons, max_dist, spot);   
+
    if(clsPhotons->get_size() < 8)
    {
       delete clsPhotons;
+      clsPhotons = NULL;
       return Color::black();
    }
    
    Color colorSum = clsPhotons->sumColors();
    
-   colorSum /= M_PI * clsPhotons->findMax().distance;
+   //old
+   //colorSum /= M_PI * clsPhotons->findMax().distance;
+   colorSum /= (4 * M_PI * max_dist * max_dist);
    delete clsPhotons;
+   clsPhotons = NULL;
    
    return colorSum;
 }
@@ -44,11 +51,15 @@ void PhotonMap::trace_photons ()
 
    // Get light's ambient color
    Color color = cur_lt->get_ambient(sp);
-   color *= (1.0/TOTAL_PHOTONS)* 100.0; /* Multiply by 10 or 100 to make visible - temporary */
+   color *= (100.0/TOTAL_PHOTONS);// *1000.0; /* Multiply by 10 or 100 (or 1000) to make visible - temporary */
 
    // Create set of photons to fire
    Photon** genPhotons = new Photon*[TOTAL_PHOTONS];
    
+   // Added to keep track of traced photons to ensure even distribution
+   std::ofstream photon_log;
+   photon_log.open("../logs/photon.log");
+
    // Trace photons until they hit something
    unsigned int i = 0;
    while(i < (TOTAL_PHOTONS))
@@ -69,9 +80,12 @@ void PhotonMap::trace_photons ()
       // Trace path through objects
       if(trace(intersected, sp, color, genPhotons, i))
       {
+         // output to log
+         photon_log << genPhotons[i]->loc << std::endl;
          i++;
       }
    }
+   photon_log.close();
    
    // Insert photons into tree
    kdtree->insert(genPhotons, 0, TOTAL_PHOTONS-1, 1);
@@ -89,7 +103,7 @@ bool PhotonMap::trace(intersection inter, Point sp, Color photon_color, Photon**
       double reflective = (light_rflc[0] + light_rflc[1] + light_rflc[2]) / 3;
       double rand_num = rand() / (double) RAND_MAX;
       double refractive = inter.obj->refractivity();
-      
+
       if(rand_num <= reflective)
       {
          /*reflect*/

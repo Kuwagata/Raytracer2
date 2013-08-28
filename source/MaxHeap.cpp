@@ -2,16 +2,16 @@
 
 MaxHeap::MaxHeap(int cap) : size(0), capacity(cap)
 {
-   array = new Closest[capacity];
+   array = new Closest[capacity+1];
 }
 
 MaxHeap::~MaxHeap()
 {
    if(array != NULL)
    {
-      delete []array;
-      array = NULL;
+      delete[] array;
    }
+   array = NULL;
 }
 
 bool MaxHeap::isFull() const

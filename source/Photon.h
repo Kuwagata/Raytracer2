@@ -28,7 +28,7 @@ class Closest
       double distance;
       
       Closest(Photon const *p, double d);
-      Closest() {}
+      Closest() { closest = NULL; }
       bool operator< (const Closest &rhs) const;
       bool operator> (const Closest &rhs) const;
 };
